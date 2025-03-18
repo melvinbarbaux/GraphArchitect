@@ -1,178 +1,188 @@
 import os
 import yaml
 import requests
-import shutil
 import tarfile
 import zipfile
 
 from sklearn.datasets import load_iris, load_wine
 from torchvision import datasets, transforms
 
+
 class DatasetManager:
     def __init__(self, config_path="config/config_dataset.yaml", data_root="Data"):
         """
         Args:
-            config_path (str): Chemin vers le fichier de configuration YAML.
-            data_root (str): Répertoire racine où stocker les données.
+            config_path (str): Path to the YAML configuration file.
+            data_root (str): Root directory where the data will be stored.
         """
         self.config_path = config_path
         self.data_root = data_root
         self.datasets_config = {}
-        
-        # Charger la config dès l'initialisation
+
+        # Load the configuration during initialization
         self.load_yml_config()
-        
-        # S'assure que le répertoire racine existe
+
+        # Ensure that the root data directory exists
         os.makedirs(self.data_root, exist_ok=True)
 
     def load_yml_config(self):
-        """Charge le fichier YAML et stocke la config dans self.datasets_config."""
-        with open(self.config_path, 'r', encoding='utf-8') as f:
+        """Loads the YAML configuration file and stores the config in self.datasets_config."""
+        with open(self.config_path, "r", encoding="utf-8") as f:
             self.datasets_config = yaml.safe_load(f)
 
     def download_sklearn_dataset(self, dataset_name, dataset_info):
         """
-        Télécharge/charge un dataset depuis sklearn, et l'enregistre au format CSV.
+        Downloads/loads a dataset from sklearn and saves it as a CSV file.
         """
-        import pandas as pd
-        
-        data_type = dataset_info.get('data_type', 'tabular')
-        filename = dataset_info.get('filename', f"{dataset_name}.csv")
-        
-        # Prépare le chemin de sauvegarde final
+
+        data_type = dataset_info.get("data_type", "tabular")
+        filename = dataset_info.get("filename", f"{dataset_name}.csv")
+
+        # Prepare the final save directory
         save_dir = os.path.join(self.data_root, data_type)
         os.makedirs(save_dir, exist_ok=True)
         output_path = os.path.join(save_dir, filename)
 
         if os.path.exists(output_path):
-            print(f"[INFO] Le fichier {output_path} existe déjà, skip le téléchargement.")
+            print(f"[INFO] File {output_path} already exists. Skipping download.")
             return
 
         if dataset_name == "iris":
             dataset = load_iris(as_frame=True)
-            df = dataset.frame  # df contiendra data + target
+            df = dataset.frame  # df contains both data and target
         elif dataset_name == "wine":
             dataset = load_wine(as_frame=True)
             df = dataset.frame
         else:
-            raise ValueError(f"Dataset sklearn inconnu : {dataset_name}")
+            raise ValueError(f"Unknown sklearn dataset: {dataset_name}")
 
-        # Enregistre le DataFrame au format CSV
+        # Save the DataFrame as a CSV file
         df.to_csv(output_path, index=False)
-        print(f"[SKLEARN] {dataset_name} sauvegardé dans {output_path}.")
+        print(f"[SKLEARN] {dataset_name} saved to {output_path}.")
 
     def download_torchvision_dataset(self, dataset_name, dataset_info):
         """
-        Télécharge/charge un dataset depuis torchvision et l'enregistre au format .pt ou similaire.
+        Downloads/loads a dataset from torchvision and saves it as a .pt file or similar.
         """
-        data_type = dataset_info.get('data_type', 'image')
-        filename = dataset_info.get('filename', f"{dataset_name}.pt")
-        
-        # Dossier de destination
+        data_type = dataset_info.get("data_type", "image")
+
+        # Destination folder
         save_dir = os.path.join(self.data_root, data_type)
         os.makedirs(save_dir, exist_ok=True)
-        
-        # Vérification si le dossier contenant le dataset existe déjà
-        # On utilise un petit mapping entre dataset_name et dossier créé par TorchVision
+
+        # Check if the folder containing the dataset already exists.
+        # Here, we use a mapping between dataset_name and the folder created by TorchVision.
         dataset_dir_map = {
             "mnist": "MNIST",
             "fashion_mnist": "FashionMNIST",
-            "cifar10": "cifar-10-batches-py"
+            "cifar10": "cifar-10-batches-py",
         }
         target_subdir = dataset_dir_map.get(dataset_name, dataset_name)
         existing_path = os.path.join(save_dir, target_subdir)
-        
-        if os.path.exists(existing_path):
-            print(f"[INFO] Le dossier {existing_path} existe déjà, skip le téléchargement.")
-            return
-        
-        # Tu peux personnaliser les transforms selon tes besoins
-        transform = transforms.Compose([transforms.ToTensor()])
-        
-        if dataset_name == "mnist":
-            # Télécharge MNIST via torchvision
-            datasets.MNIST(root=save_dir, train=True, download=True, transform=transform)
-            datasets.MNIST(root=save_dir, train=False, download=True, transform=transform)
-            # Dans ce cas, torchvision crée déjà ses propres fichiers
-            # Optionnellement, tu peux sauvegarder un fichier .pt personnalisé
-            # Mais souvent, on laisse torchvision gérer l'arborescence (MNIST/raw, MNIST/processed)
-            print(f"[TORCHVISION] MNIST téléchargé dans {save_dir}.")
-        elif dataset_name == "fashion_mnist":
-            datasets.FashionMNIST(root=save_dir, train=True, download=True, transform=transform)
-            datasets.FashionMNIST(root=save_dir, train=False, download=True, transform=transform)
-            print(f"[TORCHVISION] FashionMNIST téléchargé dans {save_dir}.")
-        elif dataset_name == "cifar10":
-            datasets.CIFAR10(root=save_dir, train=True, download=True, transform=transform)
-            datasets.CIFAR10(root=save_dir, train=False, download=True, transform=transform)
-            print(f"[TORCHVISION] CIFAR10 téléchargé dans {save_dir}.")
-        else:
-            raise ValueError(f"Dataset torchvision inconnu : {dataset_name}")
 
-        # Si tu veux absolument un fichier unique .pt, tu peux envisager un dump
+        if os.path.exists(existing_path):
+            print(f"[INFO] Folder {existing_path} already exists. Skipping download.")
+            return
+
+        # You can customize transforms as needed
+        transform = transforms.Compose([transforms.ToTensor()])
+
+        if dataset_name == "mnist":
+            # Download MNIST via torchvision
+            datasets.MNIST(
+                root=save_dir, train=True, download=True, transform=transform
+            )
+            datasets.MNIST(
+                root=save_dir, train=False, download=True, transform=transform
+            )
+            print(f"[TORCHVISION] MNIST downloaded in {save_dir}.")
+        elif dataset_name == "fashion_mnist":
+            datasets.FashionMNIST(
+                root=save_dir, train=True, download=True, transform=transform
+            )
+            datasets.FashionMNIST(
+                root=save_dir, train=False, download=True, transform=transform
+            )
+            print(f"[TORCHVISION] FashionMNIST downloaded in {save_dir}.")
+        elif dataset_name == "cifar10":
+            datasets.CIFAR10(
+                root=save_dir, train=True, download=True, transform=transform
+            )
+            datasets.CIFAR10(
+                root=save_dir, train=False, download=True, transform=transform
+            )
+            print(f"[TORCHVISION] CIFAR10 downloaded in {save_dir}.")
+        else:
+            raise ValueError(f"Unknown torchvision dataset: {dataset_name}")
+
+        # If you need a single .pt file, you could consider dumping the dataset
         # torch.save(obj, os.path.join(save_dir, filename))
-        # Mais en pratique, on laisse souvent la structure par défaut de torchvision.
+        # But in practice, we often leave torchvision to manage its default structure.
 
     def download_url_dataset(self, dataset_name, dataset_info):
-        data_type = dataset_info.get('data_type', 'tabular')
-        filename = dataset_info.get('filename', f"{dataset_name}")
-        file_url = dataset_info.get('url')
-        extract = dataset_info.get('extract', False)
-    
+        data_type = dataset_info.get("data_type", "tabular")
+        filename = dataset_info.get("filename", f"{dataset_name}")
+        file_url = dataset_info.get("url")
+        extract = dataset_info.get("extract", False)
+
         save_dir = os.path.join(self.data_root, data_type)
         os.makedirs(save_dir, exist_ok=True)
-        
+
         file_path = os.path.join(save_dir, filename)
-    
-        # Vérification de l'existence
+
+        # Check for existence
         if os.path.exists(file_path):
-            print(f"[INFO] Le fichier {file_path} existe déjà, skip le téléchargement.")
-            # Optionnel: si extract=True, tu peux aussi vérifier si l'extraction a déjà été faite.
+            print(f"[INFO] File {file_path} already exists. Skipping download.")
+            # Optionally, if extract=True, you could also check if extraction has already been done.
             return
-    
-        print(f"[URL] Téléchargement de {dataset_name} depuis {file_url} ...")
+
+        print(f"[URL] Downloading {dataset_name} from {file_url} ...")
         self._download_file(file_url, file_path)
-        print(f"[URL] Fichier sauvegardé dans {file_path}.")
-    
+        print(f"[URL] File saved to {file_path}.")
+
         if extract:
             extract_dir = os.path.join(save_dir, dataset_name)
             os.makedirs(extract_dir, exist_ok=True)
             self._extract_archive(file_path, extract_dir)
-            print(f"[URL] Archive extraite dans {extract_dir}.")
+            print(f"[URL] Archive extracted to {extract_dir}.")
 
     def _download_file(self, url, dest_path):
-        """Télécharge un fichier depuis une URL et l’enregistre sur le disque."""
+        """Downloads a file from a URL and saves it to disk."""
         with requests.get(url, stream=True) as r:
             r.raise_for_status()
-            with open(dest_path, 'wb') as f:
+            with open(dest_path, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
 
     def _extract_archive(self, archive_path, extract_dir):
-        """Extrait une archive (tar, gz, zip...) dans un dossier donné."""
-        # Si c’est un tar.* ou .gz
+        """Extracts an archive (tar, gz, zip, etc.) to a given folder."""
+        # If it is a tar.* or .gz
         if tarfile.is_tarfile(archive_path):
-            with tarfile.open(archive_path, 'r:*') as tar:
+            with tarfile.open(archive_path, "r:*") as tar:
                 tar.extractall(path=extract_dir)
-        # Si c’est un ZIP
+        # If it is a ZIP
         elif zipfile.is_zipfile(archive_path):
-            with zipfile.ZipFile(archive_path, 'r') as zf:
+            with zipfile.ZipFile(archive_path, "r") as zf:
                 zf.extractall(path=extract_dir)
         else:
-            print(f"[WARN] Format d’archive non reconnu pour {archive_path}. Aucune extraction effectuée.")
+            print(
+                f"[WARN] Unrecognized archive format for {archive_path}. No extraction performed."
+            )
 
     def load_datasets(self):
         """
-        Parcourt la configuration YAML et lance le téléchargement/le chargement
-        pour chaque dataset.
+        Iterates over the YAML configuration and downloads/loads each dataset.
         """
-        for dataset_name, dataset_info in self.datasets_config.get('datasets', {}).items():
-            data_type = dataset_info.get('type', '')
-            
-            if data_type == 'sklearn':
+        for dataset_name, dataset_info in self.datasets_config.get(
+            "datasets", {}
+        ).items():
+            dataset_type = dataset_info.get("type", "")
+
+            if dataset_type == "sklearn":
                 self.download_sklearn_dataset(dataset_name, dataset_info)
-            elif data_type == 'torchvision':
+            elif dataset_type == "torchvision":
                 self.download_torchvision_dataset(dataset_name, dataset_info)
-            elif data_type == 'url':
+            elif dataset_type == "url":
                 self.download_url_dataset(dataset_name, dataset_info)
             else:
-                print(f"[INFO] Type de dataset non pris en charge ou inconnu : {data_type}")
+                print(f"[INFO] Unsupported or unknown dataset type: {dataset_type}")

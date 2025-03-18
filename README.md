@@ -46,11 +46,12 @@ datasets:
     filename: iris.csv
     description: The Iris dataset with flower measurements
   
-  mnist:
-    type: torchvision
-    data_type: image
-    filename: mnist.pt
-    description: Handwritten digits dataset (28x28 grayscale images)
+  adult_income:
+    type: url
+    data_type: tabular
+    filename: adult_income.csv
+    description: Adult income classification dataset
+    url: https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data
 ```
 
 ## Project Structure
@@ -59,6 +60,14 @@ datasets:
 GraphArchitect/
 ├── config/
 │   └── config_dataset.yaml    # Dataset configuration
+├── src/
+│   ├── __init__.py
+│   ├── data_preprocessing.py  # Prétraitement des données brutes
+│   ├── feature_extraction.py  # Extraction des caractéristiques (embeddings)
+│   ├── graph_construction.py  # Méthodes de construction de graphes (k-NN, seuil, etc.)
+│   ├── sparsification.py      # Algorithmes de filtrage et réduction de densité
+│   ├── validation.py          # Évaluation structurelle et validation indirecte des graphes
+│   └── utils.py               # Fonctions utilitaires (chargement/sauvegarde, visualisation, etc.)
 ├── data_manager.py            # Dataset management functionality
 ├── main.py                    # Entry point for the application
 ├── requirements.txt           # Python dependencies
