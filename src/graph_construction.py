@@ -12,7 +12,8 @@ def build_knn_graph(data, k=5):
     Builds a K-Nearest Neighbors (KNN) graph using a sparse neighborhood matrix.
     """
     A = kneighbors_graph(data, n_neighbors=k, mode="connectivity", include_self=False)
-    return nx.from_scipy_sparse_matrix(A)
+    print("Graph construction with KNN method completed.")
+    return nx.from_scipy_sparse_array(A)
 
 
 def build_epsilon_graph(data, epsilon=0.5):
@@ -22,7 +23,8 @@ def build_epsilon_graph(data, epsilon=0.5):
     A = radius_neighbors_graph(
         data, radius=epsilon, mode="connectivity", include_self=False
     )
-    return nx.from_scipy_sparse_matrix(A)
+    print("Graph construction with epsilon method completed.")
+    return nx.from_scipy_sparse_array(A)
 
 
 def build_mst_graph(data):
@@ -32,7 +34,8 @@ def build_mst_graph(data):
     """
     dist_matrix = squareform(pdist(data, metric="euclidean"))
     mst_sparse = minimum_spanning_tree(dist_matrix)
-    return nx.from_scipy_sparse_matrix(mst_sparse)
+    print("Graph construction with mst method completed.")
+    return nx.from_scipy_sparse_array(mst_sparse)
 
 
 def build_anchor_graph(data, num_anchors=50, k=3):
@@ -54,36 +57,16 @@ def build_anchor_graph(data, num_anchors=50, k=3):
     ]
     G = nx.Graph()
     G.add_edges_from(edges)
+    print("Graph construction with anchor method completed.")
     return G
 
 
-def build_delaunay_graph(data):
-    """
-    Builds a graph based on Delaunay triangulation.
-    Vectorized edge extraction with duplicate removal.
-    """
-    tri = Delaunay(data)
-    edges = np.concatenate(
-        [
-            np.sort(tri.simplices[:, [0, 1]], axis=1),
-            np.sort(tri.simplices[:, [0, 2]], axis=1),
-            np.sort(tri.simplices[:, [1, 2]], axis=1),
-        ],
-        axis=0,
-    )
-    unique_edges = np.unique(edges, axis=0)
-    return nx.from_edgelist(map(tuple, unique_edges))
-
-
 def build_graph(method, data, **kwargs):
+    """"
+    Builds a graph from the input data using the specified method."
     """
-    Builds a graph using the specified method.
-
-    Parameters:
-      - method: "knn", "epsilon", "mst", "anchor", or "delaunay"
-      - data: data array
-      - kwargs: method-specific parameters
-    """
+    if data.ndim > 2:
+        data = data.reshape(data.shape[0], -1)
     if method == "knn":
         return build_knn_graph(data, k=kwargs.get("k", 5))
     elif method == "epsilon":
@@ -94,7 +77,5 @@ def build_graph(method, data, **kwargs):
         return build_anchor_graph(
             data, num_anchors=kwargs.get("num_anchors", 50), k=kwargs.get("anchor_k", 3)
         )
-    elif method == "delaunay":
-        return build_delaunay_graph(data)
     else:
         raise ValueError(f"Unknown method: {method}")

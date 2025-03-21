@@ -1,5 +1,4 @@
 pandas>=2.0.0
 scikit-learn>=1.2.0
 torchvision>=0.10.0
-PyYAML>=6.0
-requests>=2.26.0
+zyaml>=0.2.5

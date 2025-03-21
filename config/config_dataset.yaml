@@ -1,83 +1,62 @@
 datasets:
-  # tabular datasets
-  iris:
-    type: sklearn
-    data_type: tabular
-    filename: iris.csv
-    description: The Iris dataset with flower measurements
-  
-  wine:
-    type: sklearn
-    data_type: tabular
-    filename: wine.csv
-    description: Wine classification dataset
-
+#  #tabular datasets
+#  iris:
+#    type: sklearn
+#    data_type: tabular
+#    filename: iris.csv
+#    target: species
+#    description: The Iris dataset with flower measurements
+#  
+#  wine:
+#    type: sklearn
+#    data_type: tabular
+#    filename: wine.csv
+#    target: target
+#    description: Wine classification dataset
+#
   boston_housing:
     type: url
     data_type: tabular
     filename: boston_housing.csv
     description: Boston housing prices dataset
+    target: medv
     url: https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv
-  
-  adult_income:
-    type: url
-    data_type: tabular
-    filename: adult_income.csv
-    description: Adult income classification dataset
-    url: https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data
-  
-  heart_disease:
-    type: url
-    data_type: tabular
-    filename: heart_disease.csv
-    description: Heart disease dataset from Cleveland Clinic
-    url: https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data
-
-
-  # image datasets
-  mnist:
-    type: torchvision
-    data_type: image
-    filename: mnist.pt
-    description: Handwritten digits dataset (28x28 grayscale images)
-  
-  fashion_mnist:
-    type: torchvision
-    data_type: image
-    filename: fashion_mnist.pt
-    description: Fashion articles dataset (28x28 grayscale images)
-  
-  cifar10:
-    type: torchvision
-    data_type: image
-    filename: cifar10.pt
-    description: Small color image classification dataset (32x32 color images)
-
-
-  # Time series datasets
-  electricity:
-    type: url
-    data_type: time_series
-    filename: electricity.zip
-    description: Electricity load diagrams dataset
-    url: https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip
-    extract: true
-
-  # Text datasets
-  imdb_reviews:
-    type: url
-    data_type: text
-    filename: imdb_reviews.tar.gz
-    description: IMDB movie reviews sentiment dataset
-    url: https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
-    extract: true
-  
-  
-  # Audio datasets
-  librispeech:
-    type: url
-    data_type: audio
-    filename: librispeech_dev_clean.tar.gz
-    description: LibriSpeech ASR corpus - dev-clean subset (clean speech)
-    url: https://www.openslr.org/resources/12/dev-clean.tar.gz
-    extract: true
+#
+#
+#  # image datasets
+#  mnist:
+#    type: torchvision
+#    data_type: image
+#    filename: mnist.pt
+#    description: Handwritten digits dataset (28x28 grayscale images)
+#  
+#  fashion_mnist:
+#    type: torchvision
+#    data_type: image
+#    filename: fashion_mnist.pt
+#    description: Fashion articles dataset (28x28 grayscale images)
+#  
+#  cifar10:
+#    type: torchvision
+#    data_type: image
+#    filename: cifar10.pt
+#    description: Small color image classification dataset (32x32 color images)
+#
+#
+#  # Time series datasets
+#  electricity:
+#    type: url
+#    data_type: time_series
+#    filename: electricity.zip
+#    description: Electricity load diagrams dataset
+#    url: https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip
+#    extract: true
+#
+#  # Text datasets
+#  imdb_reviews:
+#    type: url
+#    data_type: text
+#    filename: imdb_reviews.tar.gz
+#    description: IMDB movie reviews sentiment dataset
+#    url: https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
+#    extract: true

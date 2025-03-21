@@ -9,7 +9,5 @@ venv/
 env/
 
 # IDE related files
-.idea/
 .vscode/
 .DS_Store
-run_code_checks.py

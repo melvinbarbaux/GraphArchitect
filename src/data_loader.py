@@ -8,7 +8,7 @@ from sklearn.datasets import load_iris, load_wine
 from torchvision import datasets, transforms
 
 
-class DatasetManager:
+class DataLoader:
     def __init__(self, config_path="config/config_dataset.yaml", data_root="Data"):
         """
         Args:
@@ -49,7 +49,7 @@ class DatasetManager:
 
         if dataset_name == "iris":
             dataset = load_iris(as_frame=True)
-            df = dataset.frame  # df contains both data and target
+            df = dataset.frame
         elif dataset_name == "wine":
             dataset = load_wine(as_frame=True)
             df = dataset.frame
